@@ -1,1 +1,50 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on MysticalWing Blog</title><link>https://mysticalwing.github.io/posts/</link><description>Recent content in Posts on MysticalWing Blog</description><generator>Hugo -- 0.147.7</generator><language>en-us</language><lastBuildDate>Fri, 06 Jun 2025 17:43:14 +0800</lastBuildDate><atom:link href="https://mysticalwing.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Hello Hugo</title><link>https://mysticalwing.github.io/posts/hello-hugo/</link><pubDate>Fri, 06 Jun 2025 17:43:14 +0800</pubDate><guid>https://mysticalwing.github.io/posts/hello-hugo/</guid><description>&lt;p>hugo 博客测试页面&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on MysticalWing Blog</title><link>https://mysticalwing.github.io/posts/</link><description>Recent content in Posts on MysticalWing Blog</description><generator>Hugo -- 0.147.7</generator><language>en-us</language><lastBuildDate>Fri, 06 Jun 2025 17:43:14 +0800</lastBuildDate><atom:link href="https://mysticalwing.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Hugo+Github 部署个人静态博客</title><link>https://mysticalwing.github.io/posts/static_blog_deploy_by_hugo_and_github/</link><pubDate>Fri, 06 Jun 2025 17:43:14 +0800</pubDate><guid>https://mysticalwing.github.io/posts/static_blog_deploy_by_hugo_and_github/</guid><description>&lt;p>&lt;em>note: 文章内容大部分由 gpt 生成，作者仅做了少量修改&lt;/em>&lt;/p>
+&lt;p>下面是 Hugo + PaperMod 博客部署到 GitHub Pages 的自动化流程，&lt;strong>从创建到访问网站&lt;/strong>全流程讲解。&lt;/p>
+&lt;hr>
+&lt;h2 id="-项目结构规划">🗂️ 项目结构规划&lt;/h2>
+&lt;p>你将有两个选项部署 Hugo 博客：&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>方式&lt;/th>
+&lt;th>描述&lt;/th>
+&lt;th>推荐用途&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>✅ &lt;strong>方式 A（推荐）&lt;/strong>&lt;/td>
+&lt;td>使用专门仓库，如 &lt;code>mysticalwing.github.io&lt;/code> 作为 GitHub Pages 源&lt;/td>
+&lt;td>博客位于根域名：&lt;code>https://mysticalwing.github.io/&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>方式 B&lt;/td>
+&lt;td>使用 &lt;code>my-hugo-blog&lt;/code> 仓库，部署到 &lt;code>gh-pages&lt;/code>&lt;/td>
+&lt;td>博客位于子路径：&lt;code>https://mysticalwing.github.io/my-hugo-blog/&lt;/code>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>我们采用 &lt;strong>方式 A（部署到根域名）&lt;/strong>。&lt;/p>
+&lt;hr>
+&lt;h2 id="-全流程指南">✅ 全流程指南&lt;/h2>
+&lt;hr>
+&lt;h3 id="-安装-hugo仅本地操作时需要">① 安装 Hugo（仅本地操作时需要）&lt;/h3>
+&lt;h4 id="macos">macOS:&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>brew install hugo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="windows">Windows:&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>scoop install hugo
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="检查版本">检查版本：&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>hugo version
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="-创建-hugo-博客项目">② 创建 Hugo 博客项目&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>hugo new site mysticalwing.github.io
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd mysticalwing.github.io
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># delete hugo.toml and use config.toml&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>rm hugo.toml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="-添加主题-papermod">③ 添加主题 PaperMod&lt;/h3>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>git init
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git submodule add https://github.com/adityatelange/hugo-PaperMod themes/PaperMod
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="-配置-configtoml">④ 配置 &lt;code>config.toml&lt;/code>&lt;/h3>
+&lt;p>在根目录下新建或编辑 &lt;code>config.toml&lt;/code>：&lt;/p></description></item></channel></rss>
