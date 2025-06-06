@@ -1,0 +1,28 @@
+baseURL = 'https://mysticalwing.github.io/'
+languageCode = 'en-us'
+title = 'MysticalWing Blog'
+theme = 'PaperMod'
+paginate = 10
+enableRobotsTXT = true
+
+[params]
+  homeInfoParams = { Title = "你好 👋", Content = "欢迎来到我的博客！" }
+  ShowReadingTime = true
+  ShowShareButtons = true
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+
+[[menu.main]]
+  name = "主页"
+  url = "/"
+  weight = 1
+
+[[menu.main]]
+  name = "归档"
+  url = "/archives/"
+  weight = 2
+
+[[menu.main]]
+  name = "标签"
+  url = "/tags/"
+  weight = 3
