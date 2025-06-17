@@ -1,0 +1,173 @@
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Home server 折腾日记 | MysticalWing Blog</title><meta name=keywords content><meta name=description content="最近又在折腾 home-server，准备搞个 all-in-one。此文做一个记录，方便以后查阅。折腾了两周左右，目前基本稳定了，基本达到了预期效果。
+系统介绍
+硬件：
+
+主机：intel H410 平台，4G 内存+赛扬 G5900T 处理器
+机箱：笨牛 B6，6 盘位主板（带背板）
+电源：闲置的 450w 白金全模组电源
+网络：双网口（板载千兆+pcie 扩展的 2.5G）
+硬盘：2 块 SSD（512G+1T），3 块 HDD（14T+4T*2）
+
+SSD-512G：系统盘，剩余空间存放 docker 和其他应用的数据
+SSD-1T：存放小文件数据（例如相册数据、电影的刮削数据等），重要数据备份到 4T 的 RAID 盘上
+HDD-14T：影音盘，格式为 NTFS，存放影音数据
+HDD-4T*2：组 RAID1，主要做备份盘，存放图片和其他重要数据
+
+
+
+软件：
+
+fnOS 做底层系统
+使用 fnOS 提供的 docker 部署局域网服务
+
+AdGuardHome 服务：局域网 dns 服务，提供广告过滤和自定义 dns 的能力
+nginx-proxy-manager：反向代理服务，所有服务不对外暴露端口，都只能通过 npm 的反代进行访问
+code-server：部署在服务器上的一个 vscode 服务器，可以随时通过浏览器进行访问
+
+
+
+网络拓扑
+整体入下：
+
+重点：
+
+对 nas 的两个网口进行了功能划分
+
+板载千兆网口负责外网连接
+pcie 扩展的 2.5G 网口仅用作内网传输和 fnOS 的访问地址
+
+
+使用 macvlan 隔离了 dns 和 npm 服务的 ip 地址，避免反代时的一些奇怪的问题和端口冲突
+其他 docker 服务都绑定到虚拟网桥，npm 通过虚拟网桥使用 container_name:port 的方式访问到服务
+所有服务统一通过 npm 反代进行暴露，不再需要对每个服务都进行端口映射
+
+docker 服务部署
+docker 部署主要用的是 docker-compose 的方式（可以直接让 gpt 生成然后再手动微调）。目前使用的 docker-compose 文件如下:"><meta name=author content><link rel=canonical href=https://mysticalwing.github.io/post/2.-home-server/><link crossorigin=anonymous href=/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css integrity="sha256-j+ECM6cGvIfy4Is8+XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as=style><link rel=icon href=https://mysticalwing.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://mysticalwing.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://mysticalwing.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://mysticalwing.github.io/apple-touch-icon.png><link rel=mask-icon href=https://mysticalwing.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://mysticalwing.github.io/post/2.-home-server/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><meta property="og:url" content="https://mysticalwing.github.io/post/2.-home-server/"><meta property="og:site_name" content="MysticalWing Blog"><meta property="og:title" content="Home server 折腾日记"><meta property="og:description" content="最近又在折腾 home-server，准备搞个 all-in-one。此文做一个记录，方便以后查阅。折腾了两周左右，目前基本稳定了，基本达到了预期效果。
+系统介绍 硬件：
+主机：intel H410 平台，4G 内存+赛扬 G5900T 处理器 机箱：笨牛 B6，6 盘位主板（带背板） 电源：闲置的 450w 白金全模组电源 网络：双网口（板载千兆+pcie 扩展的 2.5G） 硬盘：2 块 SSD（512G+1T），3 块 HDD（14T+4T*2） SSD-512G：系统盘，剩余空间存放 docker 和其他应用的数据 SSD-1T：存放小文件数据（例如相册数据、电影的刮削数据等），重要数据备份到 4T 的 RAID 盘上 HDD-14T：影音盘，格式为 NTFS，存放影音数据 HDD-4T*2：组 RAID1，主要做备份盘，存放图片和其他重要数据 软件：
+fnOS 做底层系统 使用 fnOS 提供的 docker 部署局域网服务 AdGuardHome 服务：局域网 dns 服务，提供广告过滤和自定义 dns 的能力 nginx-proxy-manager：反向代理服务，所有服务不对外暴露端口，都只能通过 npm 的反代进行访问 code-server：部署在服务器上的一个 vscode 服务器，可以随时通过浏览器进行访问 网络拓扑 整体入下： 重点：
+对 nas 的两个网口进行了功能划分 板载千兆网口负责外网连接 pcie 扩展的 2.5G 网口仅用作内网传输和 fnOS 的访问地址 使用 macvlan 隔离了 dns 和 npm 服务的 ip 地址，避免反代时的一些奇怪的问题和端口冲突 其他 docker 服务都绑定到虚拟网桥，npm 通过虚拟网桥使用 container_name:port 的方式访问到服务 所有服务统一通过 npm 反代进行暴露，不再需要对每个服务都进行端口映射 docker 服务部署 docker 部署主要用的是 docker-compose 的方式（可以直接让 gpt 生成然后再手动微调）。目前使用的 docker-compose 文件如下:"><meta property="og:locale" content="en-us"><meta property="og:type" content="article"><meta property="article:section" content="post"><meta property="article:published_time" content="2025-06-17T11:59:08+00:00"><meta property="article:modified_time" content="2025-06-17T11:59:08+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Home server 折腾日记"><meta name=twitter:description content="最近又在折腾 home-server，准备搞个 all-in-one。此文做一个记录，方便以后查阅。折腾了两周左右，目前基本稳定了，基本达到了预期效果。
+系统介绍
+硬件：
+
+主机：intel H410 平台，4G 内存+赛扬 G5900T 处理器
+机箱：笨牛 B6，6 盘位主板（带背板）
+电源：闲置的 450w 白金全模组电源
+网络：双网口（板载千兆+pcie 扩展的 2.5G）
+硬盘：2 块 SSD（512G+1T），3 块 HDD（14T+4T*2）
+
+SSD-512G：系统盘，剩余空间存放 docker 和其他应用的数据
+SSD-1T：存放小文件数据（例如相册数据、电影的刮削数据等），重要数据备份到 4T 的 RAID 盘上
+HDD-14T：影音盘，格式为 NTFS，存放影音数据
+HDD-4T*2：组 RAID1，主要做备份盘，存放图片和其他重要数据
+
+
+
+软件：
+
+fnOS 做底层系统
+使用 fnOS 提供的 docker 部署局域网服务
+
+AdGuardHome 服务：局域网 dns 服务，提供广告过滤和自定义 dns 的能力
+nginx-proxy-manager：反向代理服务，所有服务不对外暴露端口，都只能通过 npm 的反代进行访问
+code-server：部署在服务器上的一个 vscode 服务器，可以随时通过浏览器进行访问
+
+
+
+网络拓扑
+整体入下：
+
+重点：
+
+对 nas 的两个网口进行了功能划分
+
+板载千兆网口负责外网连接
+pcie 扩展的 2.5G 网口仅用作内网传输和 fnOS 的访问地址
+
+
+使用 macvlan 隔离了 dns 和 npm 服务的 ip 地址，避免反代时的一些奇怪的问题和端口冲突
+其他 docker 服务都绑定到虚拟网桥，npm 通过虚拟网桥使用 container_name:port 的方式访问到服务
+所有服务统一通过 npm 反代进行暴露，不再需要对每个服务都进行端口映射
+
+docker 服务部署
+docker 部署主要用的是 docker-compose 的方式（可以直接让 gpt 生成然后再手动微调）。目前使用的 docker-compose 文件如下:"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://mysticalwing.github.io/post/"},{"@type":"ListItem","position":2,"name":"Home server 折腾日记","item":"https://mysticalwing.github.io/post/2.-home-server/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Home server 折腾日记","name":"Home server 折腾日记","description":"最近又在折腾 home-server，准备搞个 all-in-one。此文做一个记录，方便以后查阅。折腾了两周左右，目前基本稳定了，基本达到了预期效果。\n系统介绍 硬件：\n主机：intel H410 平台，4G 内存+赛扬 G5900T 处理器 机箱：笨牛 B6，6 盘位主板（带背板） 电源：闲置的 450w 白金全模组电源 网络：双网口（板载千兆+pcie 扩展的 2.5G） 硬盘：2 块 SSD（512G+1T），3 块 HDD（14T+4T*2） SSD-512G：系统盘，剩余空间存放 docker 和其他应用的数据 SSD-1T：存放小文件数据（例如相册数据、电影的刮削数据等），重要数据备份到 4T 的 RAID 盘上 HDD-14T：影音盘，格式为 NTFS，存放影音数据 HDD-4T*2：组 RAID1，主要做备份盘，存放图片和其他重要数据 软件：\nfnOS 做底层系统 使用 fnOS 提供的 docker 部署局域网服务 AdGuardHome 服务：局域网 dns 服务，提供广告过滤和自定义 dns 的能力 nginx-proxy-manager：反向代理服务，所有服务不对外暴露端口，都只能通过 npm 的反代进行访问 code-server：部署在服务器上的一个 vscode 服务器，可以随时通过浏览器进行访问 网络拓扑 整体入下： 重点：\n对 nas 的两个网口进行了功能划分 板载千兆网口负责外网连接 pcie 扩展的 2.5G 网口仅用作内网传输和 fnOS 的访问地址 使用 macvlan 隔离了 dns 和 npm 服务的 ip 地址，避免反代时的一些奇怪的问题和端口冲突 其他 docker 服务都绑定到虚拟网桥，npm 通过虚拟网桥使用 container_name:port 的方式访问到服务 所有服务统一通过 npm 反代进行暴露，不再需要对每个服务都进行端口映射 docker 服务部署 docker 部署主要用的是 docker-compose 的方式（可以直接让 gpt 生成然后再手动微调）。目前使用的 docker-compose 文件如下:\n","keywords":[],"articleBody":"最近又在折腾 home-server，准备搞个 all-in-one。此文做一个记录，方便以后查阅。折腾了两周左右，目前基本稳定了，基本达到了预期效果。\n系统介绍 硬件：\n主机：intel H410 平台，4G 内存+赛扬 G5900T 处理器 机箱：笨牛 B6，6 盘位主板（带背板） 电源：闲置的 450w 白金全模组电源 网络：双网口（板载千兆+pcie 扩展的 2.5G） 硬盘：2 块 SSD（512G+1T），3 块 HDD（14T+4T*2） SSD-512G：系统盘，剩余空间存放 docker 和其他应用的数据 SSD-1T：存放小文件数据（例如相册数据、电影的刮削数据等），重要数据备份到 4T 的 RAID 盘上 HDD-14T：影音盘，格式为 NTFS，存放影音数据 HDD-4T*2：组 RAID1，主要做备份盘，存放图片和其他重要数据 软件：\nfnOS 做底层系统 使用 fnOS 提供的 docker 部署局域网服务 AdGuardHome 服务：局域网 dns 服务，提供广告过滤和自定义 dns 的能力 nginx-proxy-manager：反向代理服务，所有服务不对外暴露端口，都只能通过 npm 的反代进行访问 code-server：部署在服务器上的一个 vscode 服务器，可以随时通过浏览器进行访问 网络拓扑 整体入下： 重点：\n对 nas 的两个网口进行了功能划分 板载千兆网口负责外网连接 pcie 扩展的 2.5G 网口仅用作内网传输和 fnOS 的访问地址 使用 macvlan 隔离了 dns 和 npm 服务的 ip 地址，避免反代时的一些奇怪的问题和端口冲突 其他 docker 服务都绑定到虚拟网桥，npm 通过虚拟网桥使用 container_name:port 的方式访问到服务 所有服务统一通过 npm 反代进行暴露，不再需要对每个服务都进行端口映射 docker 服务部署 docker 部署主要用的是 docker-compose 的方式（可以直接让 gpt 生成然后再手动微调）。目前使用的 docker-compose 文件如下:\n# All-in-one docker compose file, include # - 192.168.1.4 : dns service # - 192.168.1.5 : nginx-proxy-manager \u0026 other services version: \"3.8\" networks: # expose ip to local network macvlan_net: driver: macvlan driver_opts: parent: eno1 # 1G ipam: config: - subnet: 192.168.1.0/24 gateway: 192.168.1.1 # for communication between npm and other services internal_bridge: driver: bridge services: # --------------------- dns service -------------------- adguardhome: # admin port 3000 image: adguard/adguardhome container_name: adguardhome restart: unless-stopped networks: macvlan_net: ipv4_address: 192.168.1.14 # admin port: 3000 volumes: - ${APP_DATA_DIR}/adguardhome/workdir:/opt/adguardhome/work - ${APP_DATA_DIR}/adguardhome/confdir:/opt/adguardhome/conf # --------------------- npm service -------------------- npm: # admin port 81 image: chishin/nginx-proxy-manager-zh container_name: npm depends_on: - adguardhome restart: unless-stopped networks: macvlan_net: ipv4_address: 192.168.1.15 internal_bridge: {} # let docker allocate ip volumes: - ${APP_DATA_DIR}/npm/data:/data - ${APP_DATA_DIR}/npm/letsencrypt:/etc/letsencrypt # ------------------- other services ------------------- # for test purpose test_service: # admin port 80 image: nginx:alpine container_name: test_service depends_on: - npm restart: unless-stopped networks: internal_bridge: {} # let docker allocate ip # browser vscode code-server: # admin port 8080 container_name: code_server image: codercom/code-server volumes: - ${APP_DATA_DIR}/code-server/.config:/home/coder/.config - ${APP_DATA_DIR}/code-server/.local:/home/coder/.local - ${APP_DATA_DIR}/code-server/project:/home/coder/project - ${APP_DATA_DIR}/code-server/.ssh:/home/coder/.ssh environment: - PASSWORD=xy restart: unless-stopped networks: internal_bridge: {} # let docker allocate ip 后续 集成旁路由功能，使用虚拟机的方式进行部署（需要再加一个网口，或者复用 2.5G 网口）。 ","wordCount":"287","inLanguage":"en","datePublished":"2025-06-17T11:59:08Z","dateModified":"2025-06-17T11:59:08Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://mysticalwing.github.io/post/2.-home-server/"},"publisher":{"@type":"Organization","name":"MysticalWing Blog","logo":{"@type":"ImageObject","url":"https://mysticalwing.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://mysticalwing.github.io/ accesskey=h title="MysticalWing Blog (Alt + H)">MysticalWing Blog</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://mysticalwing.github.io/ title=主页><span>主页</span></a></li><li><a href=https://mysticalwing.github.io/archives/ title=归档><span>归档</span></a></li><li><a href=https://mysticalwing.github.io/tags/ title=标签><span>标签</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://mysticalwing.github.io/>Home</a>&nbsp;»&nbsp;<a href=https://mysticalwing.github.io/post/>Posts</a></div><h1 class="post-title entry-hint-parent">Home server 折腾日记</h1><div class=post-meta><span title='2025-06-17 11:59:08 +0000 UTC'>June 17, 2025</span>&nbsp;·&nbsp;2 min</div></header><div class=post-content><p>最近又在折腾 home-server，准备搞个 all-in-one。此文做一个记录，方便以后查阅。折腾了两周左右，目前基本稳定了，基本达到了预期效果。</p><h2 id=系统介绍>系统介绍<a hidden class=anchor aria-hidden=true href=#系统介绍>#</a></h2><p>硬件：</p><ul><li>主机：intel H410 平台，4G 内存+赛扬 G5900T 处理器</li><li>机箱：笨牛 B6，6 盘位主板（带背板）</li><li>电源：闲置的 450w 白金全模组电源</li><li>网络：双网口（板载千兆+pcie 扩展的 2.5G）</li><li>硬盘：2 块 SSD（512G+1T），3 块 HDD（14T+4T*2）<ul><li>SSD-512G：系统盘，剩余空间存放 docker 和其他应用的数据</li><li>SSD-1T：存放小文件数据（例如相册数据、电影的刮削数据等），重要数据备份到 4T 的 RAID 盘上</li><li>HDD-14T：影音盘，格式为 NTFS，存放影音数据</li><li>HDD-4T*2：组 RAID1，主要做备份盘，存放图片和其他重要数据</li></ul></li></ul><p>软件：</p><ul><li>fnOS 做底层系统</li><li>使用 fnOS 提供的 docker 部署局域网服务<ul><li>AdGuardHome 服务：局域网 dns 服务，提供广告过滤和自定义 dns 的能力</li><li>nginx-proxy-manager：反向代理服务，所有服务不对外暴露端口，都只能通过 npm 的反代进行访问</li><li>code-server：部署在服务器上的一个 vscode 服务器，可以随时通过浏览器进行访问</li></ul></li></ul><h2 id=网络拓扑>网络拓扑<a hidden class=anchor aria-hidden=true href=#网络拓扑>#</a></h2><p>整体入下：
+<img alt="network topology" loading=lazy src=/post/2.-home-server/network_topology.png></p><p>重点：</p><ol><li>对 nas 的两个网口进行了功能划分<ol><li>板载千兆网口负责外网连接</li><li>pcie 扩展的 2.5G 网口仅用作内网传输和 fnOS 的访问地址</li></ol></li><li>使用 macvlan 隔离了 dns 和 npm 服务的 ip 地址，避免反代时的一些奇怪的问题和端口冲突</li><li>其他 docker 服务都绑定到虚拟网桥，npm 通过虚拟网桥使用 container_name:port 的方式访问到服务</li><li>所有服务统一通过 npm 反代进行暴露，不再需要对每个服务都进行端口映射</li></ol><h2 id=docker-服务部署>docker 服务部署<a hidden class=anchor aria-hidden=true href=#docker-服务部署>#</a></h2><p>docker 部署主要用的是 docker-compose 的方式（可以直接让 gpt 生成然后再手动微调）。目前使用的 docker-compose 文件如下:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># All-in-one docker compose file, include</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#   - 192.168.1.4 : dns service</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#   - 192.168.1.5 : nginx-proxy-manager &amp; other services</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>version</span>: <span style=color:#e6db74>&#34;3.8&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>  <span style=color:#75715e># expose ip to local network</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>macvlan_net</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>driver</span>: <span style=color:#ae81ff>macvlan</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>driver_opts</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>parent</span>: <span style=color:#ae81ff>eno1</span> <span style=color:#75715e># 1G</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>ipam</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>config</span>:
+</span></span><span style=display:flex><span>        - <span style=color:#f92672>subnet</span>: <span style=color:#ae81ff>192.168.1.0</span><span style=color:#ae81ff>/24</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>gateway</span>: <span style=color:#ae81ff>192.168.1.1</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># for communication between npm and other services</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>internal_bridge</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>driver</span>: <span style=color:#ae81ff>bridge</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>services</span>:
+</span></span><span style=display:flex><span>  <span style=color:#75715e># --------------------- dns service --------------------</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>adguardhome</span>: <span style=color:#75715e># admin port 3000</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>adguard/adguardhome</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>container_name</span>: <span style=color:#ae81ff>adguardhome</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>macvlan_net</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>ipv4_address: 192.168.1.14 # admin port</span>: <span style=color:#ae81ff>3000</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>${APP_DATA_DIR}/adguardhome/workdir:/opt/adguardhome/work</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>${APP_DATA_DIR}/adguardhome/confdir:/opt/adguardhome/conf</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># --------------------- npm service --------------------</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>npm</span>: <span style=color:#75715e># admin port 81</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>chishin/nginx-proxy-manager-zh</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>container_name</span>: <span style=color:#ae81ff>npm</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>depends_on</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>adguardhome</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>macvlan_net</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>ipv4_address</span>: <span style=color:#ae81ff>192.168.1.15</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>internal_bridge</span>: {} <span style=color:#75715e># let docker allocate ip</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>${APP_DATA_DIR}/npm/data:/data</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>${APP_DATA_DIR}/npm/letsencrypt:/etc/letsencrypt</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># ------------------- other services -------------------</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># for test purpose</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>test_service</span>: <span style=color:#75715e># admin port 80</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>nginx:alpine</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>container_name</span>: <span style=color:#ae81ff>test_service</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>depends_on</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>npm</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>internal_bridge</span>: {} <span style=color:#75715e># let docker allocate ip</span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># browser vscode</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>code-server</span>: <span style=color:#75715e># admin port 8080</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>container_name</span>: <span style=color:#ae81ff>code_server</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>codercom/code-server</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>${APP_DATA_DIR}/code-server/.config:/home/coder/.config</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>${APP_DATA_DIR}/code-server/.local:/home/coder/.local</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>${APP_DATA_DIR}/code-server/project:/home/coder/project</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>${APP_DATA_DIR}/code-server/.ssh:/home/coder/.ssh</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>PASSWORD=xy</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>internal_bridge</span>: {} <span style=color:#75715e># let docker allocate ip</span>
+</span></span></code></pre></div><h2 id=后续>后续<a hidden class=anchor aria-hidden=true href=#后续>#</a></h2><ol><li>集成旁路由功能，使用虚拟机的方式进行部署（需要再加一个网口，或者复用 2.5G 网口）。</li></ol></div><footer class=post-footer><ul class=post-tags></ul><nav class=paginav><a class=next href=https://mysticalwing.github.io/post/1.-static-blog/><span class=title>Next »</span><br><span>Hugo+Github 部署个人静态博客</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2025 <a href=https://mysticalwing.github.io/>MysticalWing Blog</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script></body></html>
