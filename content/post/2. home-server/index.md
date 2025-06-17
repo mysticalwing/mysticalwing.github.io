@@ -1,6 +1,6 @@
 +++
 date = '2025-06-17T11:59:08Z'
-draft = true
+draft = false
 title = 'Home server 折腾日记'
 +++
 
@@ -31,7 +31,7 @@ title = 'Home server 折腾日记'
 ## 网络拓扑
 
 整体入下：
-![network topology](../assets/home_server_network_topology.png)
+![network topology](network_topology.png)
 
 重点：
 
